@@ -11,7 +11,7 @@ import { InviteButton } from './InviteButton'
 export const Navbar = () => {
 	const organization = useOrganization()
 
-	console.log(organization) // all the organizations info
+	// console.log(organization) // all the organizations info
 
 	return (
 		<div className="flex items-center gap-x-4 p-5 ">
