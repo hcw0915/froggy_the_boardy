@@ -5,10 +5,15 @@
 - Next.js
 - TypeScript
 - TailwindCSS
+  - https://tailwindcss.com/
 - shadcn/ui
+  - https://ui.shadcn.com/
 - Zustand： State Management
+  - https://zustand-demo.pmnd.rs/
 - Clerk： Authentication
+  - https://clerk.com/
 - Convex： Serverless Database
+  - https://dashboard.convex.dev/t/hcw0915
 
 ---
 
