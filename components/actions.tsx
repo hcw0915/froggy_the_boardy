@@ -6,15 +6,18 @@ import {
 	DropdownMenu,
 	DropdownMenuTrigger,
 	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator
+	DropdownMenuItem
 } from './ui/dropdown-menu'
-import { Link2, Trash2 } from 'lucide-react'
-import { toast } from 'sonner'
+import { Link2, Pencil, Trash2 } from 'lucide-react'
 import { useApiMutation } from '@/hooks/useApiMutation'
 import { api } from '@/convex/_generated/api'
 import { ConfirmModal } from './ConfirmModal'
 import { Button } from './ui/button'
+import { useRenameModalStore } from '@/store/useRenameModalStore'
+import { TOAST_MSG_MAP } from '@/constants/Toast'
+import { PromiseHandler } from '@/utils/toaster'
+
+const { copyLink, deletion } = TOAST_MSG_MAP
 
 interface ActionProps {
 	children: React.ReactNode
@@ -27,29 +30,24 @@ interface ActionProps {
 export const Actions = (props: ActionProps) => {
 	const { children, side, sideOffset, id, title } = props
 
+	const { onOpen } = useRenameModalStore()
+
 	const { handleMutate, pending } = useApiMutation(api.board.remove)
 
 	const handleCopyLink = () => {
-		navigator.clipboard
-			.writeText(`${window.location.origin}/board/${id}`)
-			.then(() => {
-				toast.success('Link copied!')
-			})
-			.catch(() => {
-				toast.error('Failed to Copy!')
-			})
+		const duplicator = navigator.clipboard.writeText(
+			`${window.location.origin}/board/${id}`
+		)
+
+		const copyWrapper = new PromiseHandler(duplicator)
+		copyWrapper.toaster(copyLink.success, copyLink.error)
 	}
 
 	const handleDelete = (title: string) => () => {
-		handleMutate({
-			id: id
-		})
-			.then(() => {
-				toast.success(`Board deleted: ${title}`)
-			})
-			.catch((err) => {
-				toast.error('Failed to delete board')
-			})
+		const mutator = handleMutate({ id })
+
+		const mutatorWrapper = new PromiseHandler(mutator)
+		mutatorWrapper.toaster(`${deletion.success}: ${title}`, deletion.error)
 	}
 
 	return (
@@ -70,6 +68,13 @@ export const Actions = (props: ActionProps) => {
 				>
 					<Link2 className="h-4 w-4 mr-2" />
 					Copy the Link!
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					className="p-3 cursor-pointer"
+					onClick={() => onOpen(id, title)}
+				>
+					<Pencil className="h-4 w-4 mr-2" />
+					Rename
 				</DropdownMenuItem>
 				<ConfirmModal
 					header="Delete board"
