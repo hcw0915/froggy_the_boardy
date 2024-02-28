@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { mutation } from './_generated/server'
+import { mutation, query } from './_generated/server'
 
 // TODO - 需要處理 Add New PICs.
 const images = ['']
@@ -46,20 +46,24 @@ export const remove = mutation({
 			throw new Error('Unauthorized access.')
 		}
 
-		await ctx.db.delete(args.id)
-
 		// TODO - delete favorites
+
+		const userId = identity.subject
+
+		const existingFavorite = await ctx.db
+			.query('userFavorites')
+			.withIndex('by_user_board', (q) =>
+				q.eq('userId', userId).eq('boardId', args.id)
+			)
+			.unique()
+
+		if (existingFavorite) {
+			await ctx.db.delete(existingFavorite._id)
+		}
+
+		await ctx.db.delete(args.id)
 	}
 })
-
-/** //* 統一行為
- * convex 協助建立 _id, _creationTime 兩個 index
- * ctx 對應到 schema 裡面的 context,
- *
- * 運用 ctx 這個 Schema 建立的 instance ，調用 Auth 資訊。
- *
- * handler =>>>> 將資料加入 db 裡面
- */
 
 export const update = mutation({
 	args: {
@@ -90,6 +94,92 @@ export const update = mutation({
 		const board = await ctx.db.patch(args.id, {
 			title: args.title
 		})
+
+		return board
+	}
+})
+
+export const favorite = mutation({
+	args: {
+		id: v.id('boards'),
+		orgId: v.string()
+	},
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity()
+		/* prettier-ignore */
+		if (!identity) throw new Error('Unauthorized access.')
+
+		const board = await ctx.db.get(args.id)
+		/* prettier-ignore */
+		if (!board) throw new Error('Board not found')
+
+		const userId = identity.subject
+
+		// 比對 使用者 ID,
+		const existingFavorite = await ctx.db
+			.query('userFavorites')
+			.withIndex(
+				'by_user_board_org',
+				(q) =>
+					q
+						.eq('userId', userId) //
+						.eq('boardId', board._id) //
+			)
+			.unique() // board._id 應該是唯一值
+
+		/* prettier-ignore */
+		if (existingFavorite) throw new Error('Board already Exist in Favorites.')
+
+		await ctx.db.insert('userFavorites', {
+			userId,
+			boardId: board._id,
+			orgId: args.orgId
+		})
+
+		return board
+	}
+})
+
+export const unfavorite = mutation({
+	args: {
+		id: v.id('boards')
+	},
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity()
+		/* prettier-ignore */
+		if (!identity) throw new Error('Unauthorized access.')
+
+		const board = await ctx.db.get(args.id)
+		/* prettier-ignore */
+		if (!board) throw new Error('Board not found')
+
+		const userId = identity.subject
+
+		// 比對 使用者 ID,
+		const existingFavorite = await ctx.db
+			.query('userFavorites')
+			.withIndex(
+				'by_user_board_org',
+				(q) =>
+					q
+						.eq('userId', userId) //
+						.eq('boardId', board._id) //
+				// TODO - check if orgId needed
+			)
+			.unique() // board._id 應該是唯一值
+
+		/* prettier-ignore */
+		if (!existingFavorite) throw new Error('Favorite board not found.')
+
+		await ctx.db.delete(existingFavorite._id)
+		return board
+	}
+})
+
+export const get = query({
+	args: { id: v.id('boards') },
+	handler: async (ctx, args) => {
+		const board = ctx.db.get(args.id)
 
 		return board
 	}
