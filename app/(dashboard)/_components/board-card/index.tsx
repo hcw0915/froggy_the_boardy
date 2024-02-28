@@ -11,6 +11,8 @@ import { Footer } from './Footer'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Actions } from '@/components/actions'
 import { MoreHorizontal } from 'lucide-react'
+import { useApiMutation } from '@/hooks/useApiMutation'
+import { api } from '@/convex/_generated/api'
 
 interface IBoardCardProps {
 	id: string
@@ -36,8 +38,23 @@ export const BoardCard = (props: IBoardCardProps) => {
 	} = props
 
 	const { userId } = useAuth()
+
+	const { handleMutate: handleFavorite, pending: pendingFavorite } =
+		useApiMutation(api.board.favorite)
+	const { handleMutate: handleUnfavorite, pending: pendingUnfavorite } =
+		useApiMutation(api.board.unfavorite)
+
 	const authorLabel = userId === authorId ? 'You' : authorName
 	const createdAtLabel = formatDistanceToNow(createdAt, { addSuffix: true })
+
+	const toggleFavorite = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault()
+		if (isFavorite) {
+			handleUnfavorite({ id })
+		} else {
+			handleFavorite({ id, orgId })
+		}
+	}
 
 	return (
 		<Link href={`/board/${id}`}>
@@ -64,9 +81,9 @@ export const BoardCard = (props: IBoardCardProps) => {
 					title={title}
 					authorLabel={authorLabel}
 					createdAtLabel={createdAtLabel}
-					disabled={false}
 					isFavorite={isFavorite}
-					onClick={() => {}}
+					disabled={pendingFavorite}
+					toggleFavorite={toggleFavorite}
 				/>
 			</div>
 		</Link>

@@ -24,7 +24,8 @@ interface BoardListProps {
 export const BoardList = (props: BoardListProps) => {
 	const { orgId, querySearch } = props
 
-	const data = useQuery(api.boards.get, { orgId })
+	// searching issue
+	const data = useQuery(api.boards.get, { orgId, search: querySearch.search })
 
 	if (!data) {
 		return (
@@ -92,7 +93,7 @@ export const BoardList = (props: BoardListProps) => {
 							authorName={board.authorName}
 							createdAt={board._creationTime}
 							orgId={board.orgId}
-							isFavorite={false}
+							isFavorite={board.isFavorite}
 						/>
 					)
 				})}

@@ -7,12 +7,18 @@ interface IFooterProps {
 	createdAtLabel: string
 	disabled: boolean
 	isFavorite: boolean
-	onClick: () => void
+	toggleFavorite: (e: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 export const Footer = (props: IFooterProps) => {
-	const { title, authorLabel, createdAtLabel, disabled, isFavorite, onClick } =
-		props
+	const {
+		title,
+		authorLabel,
+		createdAtLabel,
+		disabled,
+		isFavorite,
+		toggleFavorite
+	} = props
 
 	return (
 		<div className="relative bg-white p-3">
@@ -29,7 +35,7 @@ export const Footer = (props: IFooterProps) => {
 					disabled && 'cursor-not-allowed opacity-75'
 				)}
 				disabled={disabled}
-				onClick={onClick}
+				onClick={toggleFavorite}
 			>
 				<Star
 					className={cn(
