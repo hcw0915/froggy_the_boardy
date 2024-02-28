@@ -1,16 +1,20 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { useMutation } from 'convex/react'
-import { api } from '@/convex/_generated/api'
-
-import Image from 'next/image'
 import React from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { api } from '@/convex/_generated/api'
 import { useOrganization } from '@clerk/nextjs'
+
+import { Button } from '@/components/ui/button'
 import { useApiMutation } from '@/hooks/useApiMutation'
+import { TOAST_MSG_MAP } from '@/constants/Toast'
 import { toast } from 'sonner'
 
+const { create } = TOAST_MSG_MAP
+
 export const EmptyBoards = () => {
+	const router = useRouter()
 	const { organization } = useOrganization()
 	const { pending, handleMutate } = useApiMutation(api.board.create) // fetch the data (board)
 
@@ -21,10 +25,13 @@ export const EmptyBoards = () => {
 			orgId: organization.id,
 			title: 'Untitled'
 		})
-			.then(() => {
-				toast.success('Board created')
+			.then((id) => {
+				toast.success(create.success)
+				router.push(`/board/${id}`)
 			})
-			.catch(() => toast.error('Failed to create board'))
+			.catch((err) => {
+				toast.error(create.error)
+			})
 	}
 
 	return (

@@ -1,12 +1,16 @@
 'use client'
 
-import { api } from '@/convex/_generated/api'
-import { useApiMutation } from '@/hooks/useApiMutation'
-import { cn } from '@/lib/utils'
-import { useMutation } from 'convex/react'
-import { Plus } from 'lucide-react'
 import React from 'react'
+import { useRouter } from 'next/navigation'
+import { api } from '@/convex/_generated/api'
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
+
+import { cn } from '@/lib/utils'
+import { TOAST_MSG_MAP } from '@/constants/Toast'
+import { useApiMutation } from '@/hooks/useApiMutation'
+
+const { create } = TOAST_MSG_MAP
 
 interface INewBoardButtonProps {
 	orgId: string
@@ -16,6 +20,7 @@ interface INewBoardButtonProps {
 export const NewBoardButton = (props: INewBoardButtonProps) => {
 	const { orgId, disabled } = props
 
+	const router = useRouter()
 	const { handleMutate, pending } = useApiMutation(api.board.create)
 
 	const handleCreate = () => {
@@ -24,11 +29,11 @@ export const NewBoardButton = (props: INewBoardButtonProps) => {
 			title: 'Untitled'
 		})
 			.then((id) => {
-				toast.success('Board created', id)
-				// TODO - Redirect to board URL
+				toast.success(create.success)
+				router.push(`/board/${id}`)
 			})
 			.catch((err) => {
-				toast.error('Failed to create board!', err)
+				toast.error(create.error)
 			})
 	}
 
