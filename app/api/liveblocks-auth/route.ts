@@ -35,7 +35,7 @@ export const POST = async (request: Request) => {
 		picture: user.imageUrl
 	}
 
-	// 可以透過 liveblocks 的內建驗證處理權限問題。=> 可以利用第二個參數傳遞 data, 利用 useSelf() 去調用
+	// 可以透過 liveblocks 的內建驗證處理權限問題。=> 可以利用第二個參數傳遞 data, 利用 useSelf() 調用
 	const session = liveblocks.prepareSession(user.id, { userInfo })
 
 	if (room) {
