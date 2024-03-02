@@ -97,3 +97,10 @@ export type CanvasState =
 	| {
 			mode: CanvasMode.Pencil
 	  }
+
+export type Layer =
+	| RectangleLayer
+	| EllipseLayer
+	| PathLayer
+	| TextLayer
+	| NoteLayer
