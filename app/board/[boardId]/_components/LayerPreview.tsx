@@ -21,8 +21,8 @@ export const LayerPreview = memo((props: LayerPreviewProps) => {
 			return (
 				<Rectangle
 					id={id}
-					selectionColor={selectionColor}
 					layer={layer}
+					selectionColor={selectionColor}
 					onPointerDown={onLayerPointerDown}
 				/>
 			)
